@@ -5,8 +5,6 @@ account: aconcagua
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3400350
-bundleId: 4026172
+bundleId: 4061868
 url: https://aconcagua.shinyapps.io/trabajofinal/
-when: 1608828326.96177
-asMultiple: FALSE
-asStatic: FALSE
+when: 1609878887.99123

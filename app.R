@@ -1,7 +1,4 @@
 
-library(BiocManager)
-options(repos = BiocManager::repositories())
-
 library(multiMiR)
 library(shiny)
 library(shinydashboard)
@@ -22,8 +19,6 @@ library(cgdsr)
 
 
 
-
-
 choicesgen<- c("PTEN", "AFP", "STAT3", "SIRT7", "GC", "XPO5", "HMGA2", "VEGFA", "FOXO1",  "ZEB1", "PDCD4", "GPC3", "EGFR", "SIRT1", "MET", "DNMT1", "IGF1R", "TET1", "CDC42", "KLF5", "GRN", "FOXA1", "MACC1","SOCS1", "TP53", "E2F1", "E2F3", "ROCK1", "SP1",  "CTGF", "DICER1", "HGF", "ROCK2", "BMI1", "CDK1", "FUT8", "METTL3", "PIK3R3", "AKAP12", "AURKA", "CTNNB1", "EGFL7", "HDAC6", "IGF2", "IGF2BP1", "SMAD2", "SOCS3", "UBE2I", "VDAC1", "ZEB2", "ABCB1", "AKT2","CCNE1", "FBXO11")
 choicesmutation<-c("AFP","DICER1", "GNMT", "CREB1", "ADI1", "CYP2C9", "SIRT7", "UGT2B4", "METTL3", "BMI1", "CTNNB1", "PPP1R15B", "PTEN", "TP53", "UGT2B7", "TERT", "XPO5", "AGA", "CAV1", "CEP55", "PBX3", "ADAMTS4", "CCNE1", "CDC25A", "FGF19", "ZC3H13", "CSMD3", "CTHRC1", "E2F7", "IGF2BP1", "MET", "NRAS", "PCNA", "RHEB", "RICTOR", "TG", "TSC1", "TSC2", "VEGFA")
 choicesmiarn<-c("mir-122", "mir-21", "mir-221","mir-125b", "mir-34a", "mir-26a", "mir-148a", "mir-224", "mir-101", "mir-145", "mir-155", "mir-146a", "mir-375", "mir-7","mir-195", "mir-214", "mir-200a", "mir-124", "mir-16", "mir-223", "mir-9", "mir-203", "mir-18a",  "mir-29", "mir-139", "mir-181a", "mir-29a", "mir-126", "mir-141", "mir-106b", "mir-23a", "mir-199a-3p", "mir-338-3p", "mir-1", "mir-22", "mir-143", "mir-499", "mir-100", "mir-130b", "mir-638", "mir-222", "mir-503", "mir-125a", "mir-449a")
@@ -38,14 +33,14 @@ entrez_id<-select(org.Hs.eg.db,
 
 
 ui <- dashboardPage(
-  skin="purple",
+  skin="purple",title = "HmiR²",
   dashboardHeader(
     tags$li(
         class = "dropdown"
         ,tags$style(".main-header {max-height: 70px}")
         ,tags$style(".main-header .logo {height: 70px}")
+        
     ),
-
     title = titulo
 
   ),
@@ -54,14 +49,13 @@ ui <- dashboardPage(
       br(),
       menuItem("Genes", tabName = "Genes", icon = icon("dna"), startExpanded = "TRUE", 
         menuSubItem("Publicaciones en Pubmed", tabName = "pubmed1"),
-        menuSubItem("GO", tabName = "GO1"),
-        menuSubItem("Clinical Trials", tabName = "clinical")),
+        menuSubItem("GO", tabName = "GO1")),
       menuItem("miARN", tabName = "miARN", icon = icon("vial"), startExpanded = "TRUE",
         menuSubItem("Publicaciones en Pubmed", tabName = "pubmed2"),
-        menuSubItem("miRData", tabName = "miRData")),
+        menuSubItem("Datos miR", tabName = "miRData")),
       menuItem("Mutaciones", tabName = "Mutaciones", icon = icon("atom"), startExpanded = "TRUE",
         menuSubItem("Publicaciones en Pubmed", tabName = "pubmed3"),
-        menuSubItem("My Cancer Genome", tabName = "cancer")),
+        menuSubItem("Info mutacion", tabName = "cancer")),
       menuItem("Entorno HCC", tabName = "mapa", icon = icon("sitemap"), startExpanded = "TRUE")
     )
   ),
@@ -73,7 +67,10 @@ ui <- dashboardPage(
     ),
     tabItems(
       tabItem(tabName = "pubmed1",
-        h2("Busqueda de Genes en Pubmed"),
+        h1("Busqueda de Genes en Pubmed"),
+        br(),
+        h3("Las publicaciones comprenden un periodo de 20 años(2000-2020), se mostraran de forma descendiente"),
+        br(),
         htmlOutput("genes"),
         br(),
         selectInput("pubmeda", "Selecciona un Gen", choices = choicesgen),
@@ -87,7 +84,9 @@ ui <- dashboardPage(
         wellPanel(htmlOutput("panelPublicacionTMP"))
       ),
       tabItem(tabName = "pubmed2",
-        h2("Busqueda de miARN en Pubmed"),
+        h1("Busqueda de miARN en Pubmed"),
+        h3("Las publicaciones comprenden un periodo de 20 años(2000-2020), se mostraran de forma descendiente"),
+        br(),
         htmlOutput("miarn"),
         br(),
         selectInput("pubmedb", "Selecciona un miARN", choices = choicesmiarn),
@@ -101,7 +100,9 @@ ui <- dashboardPage(
         wellPanel(htmlOutput("panelPublicacionTMPS"))
       ),
       tabItem(tabName = "pubmed3",
-        h2("Busqueda de mutaciones en Pubmed"),
+        h1("Busqueda de mutaciones en Pubmed"),
+        h3("Las publicaciones comprenden un periodo de 20 años(2000-2020), se mostraran de forma descendiente"),
+        br(),
         br(),
         actionButton(inputId = "pub3", label = "Buscar", icon = icon("search"), block= FALSE),
         add_busy_bar(color = "white"),
@@ -133,21 +134,22 @@ ui <- dashboardPage(
               tags$div(style= 'cursor:pointer',DT::dataTableOutput("resultadosgo"))
             ),
             tabPanel(title= "Similitud Genes", width = 12,
-              h2("Los genes deben ir con el identidicador Entrez"),
-              div(textInput(inputId = "input1", label = "Escribe el primer gen"),
-                div(textInput(inputId = "input2", label = "Escribe el segundo gen"),
-                tags$div(style = "text-align: right;", tableOutput("simgen")))
+              h2("Similitud de genes basados en terminos GO", align= "center"),
+              h3("Los genes deben ir con el identidicador Entrez"),
+              div(style = "margin-left: 50px;", div(textInput(inputId = "input1", label = "Escribe el primer gen")),
+                div(textInput(inputId = "input2", label = "Escribe el segundo gen")
+                ),tableOutput("simgen")
+               )
               )
             )
           )
-        )
       ),
       tabItem(tabName = "cancer",
-        h2("Muestras de mutaciones"),
+        h2("Estudios realizados sobre genes mutados"),
         fluidPage(
           fluidRow(
             tags$head(tags$style(HTML(".small-box {height: 250px}"))),
-            valueBox(h2("Identificadores Entrez"), width = 6, color = "purple",
+            valueBox(h2("Al seleccionar un gen se obtiene informacion sobre las mutaciones encontradas"), width = 6, color = "purple",
               div( selectInput("mutacion", "Selecciona un gen", choices = choicesmutation))
             )
           )
@@ -171,7 +173,7 @@ ui <- dashboardPage(
           fluidRow(
             tags$head(tags$style(HTML(".small-box {height: 250px}"))),
             valueBox(h2("A partir de un gen elegido, se muestra todos los miARN que se dirigen a el"), width = 6, color = "purple",
-              div( selectInput("microgen", "Selecciona un gen", choices = choicesgen))
+              div( selectInput("microgen", "Selecciona un gen", choices = choicesmutation))
             ),
             valueBox(h2("A partir de un miARN, se muestra todos los genes dianas a los que se dirigen"), width = 6, color = "aqua",
               div(textInput(inputId = "inputarn", label = "Escribe el miARN", value = "hsa-miR-338-3p"))
@@ -190,9 +192,7 @@ ui <- dashboardPage(
       )
     )
   )
-)          
-
-
+)         
 
 
 
@@ -234,6 +234,9 @@ server <- function(input, output, session) {
           )
           , fixed = TRUE)
         , target="_blank"
+      )
+      cat(
+        paste("<br><p style='color:purple; font-size:24px;'>",corpus1@Journal[s], "</p><br>")
       )
       cat(
         abstract
@@ -298,6 +301,9 @@ server <- function(input, output, session) {
         , target="_blank"
       )
       cat(
+        paste("<br><p style='color:purple; font-size:24px;'>",corpus2@Journal[s1], "</p><br>")
+      )
+      cat(
         abstract
       )
       cat(
@@ -360,6 +366,9 @@ server <- function(input, output, session) {
         , target="_blank"
       )
       cat(
+        paste("<br><p style='color:purple; font-size:24px;'>",corpus3@Journal[s2], "</p><br>")
+      )
+      cat(
         abstract
       )
       cat(
@@ -389,6 +398,7 @@ server <- function(input, output, session) {
   })
   
   output$simgen<-renderTable({
+    
     getGeneSim(c(input$input1,input$input2),similarity="OA",similarityTerm="Lin",avg=FALSE, verbose= FALSE)
   })
   
@@ -396,7 +406,7 @@ server <- function(input, output, session) {
   
   
   hiperlink <- a("Ver detalles del mapa en la pagina web de KEGG",href=
-                   "https://www.genome.jp/dbget-bin/www_bget?pathway+hsa05225")
+                   "https://www.genome.jp/dbget-bin/www_bget?pathway+hsa05225", target="_blank")
   
   
   output$mapakegg<-renderUI({
@@ -418,6 +428,7 @@ server <- function(input, output, session) {
     ), options = list(language= list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json'),pageLength = 5))
     tabla_mut
   })
+  
   #miARN
   output$publicacionesarn <- renderDataTable({
       example3 <- get_multimir(org = "hsa",
